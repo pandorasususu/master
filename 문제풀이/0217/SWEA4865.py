@@ -1,0 +1,30 @@
+#SWEA4865<글자수>
+#일단 이렇게 풀어보고, 문자열 정렬 방식으로 내일(0217) 풀어보자
+
+T = int(input())
+
+for _ in range(1, T+1):
+    str1 = list(input())
+    str2 = list(input())
+    cnt_list = [0] * len(str1)
+
+    for i in range(len(str2)):
+        if str2[i] in str1:
+            cnt_list[str1.index(str2[i])] += 1
+
+    max_num = 0
+    for cnt in range(len(cnt_list)):
+        if cnt_list[cnt] > cnt_list[max_num]:
+            max_num = cnt
+
+    print(f'#{_} {cnt_list[max_num]}')
+
+
+    # ans_dict = {}
+    # for i in range(len(str1)):
+    #     ans_dict[str1[i]] = 0
+    # for idx in range(len(str2)):
+    #     if str2[idx] in ans_dict.keys():
+    #         ans_dict[str2[idx]] += 1
+    #
+    # print(f'#{_} {max(ans_dict.values())}')
