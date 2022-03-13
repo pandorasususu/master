@@ -1,33 +1,55 @@
 #BOJ14889<스타트와 링크>
 #SWEA역량테스트
 
+arr = [1, 2, 3]
+subsets = [[]]
+
+for num in arr:
+  size = len(subsets)
+  for y in range(size):
+    subsets.append(subsets[y]+[num])
+    print(num, y, subsets)
+print(subsets)
+
+
 #두번째 시도
-from itertools import combinations as cb
-tc = int(input())
-arr = [list(map(int, input().split())) for _ in range(tc)]
-member = [i for i in range(tc)]
+# from itertools import combinations as cb
+# tc = int(input())
+# arr = [list(map(int, input().split())) for _ in range(tc)]
+# member = [i for i in range(tc)]
+#
+# total = 0
+# #행렬 전체합 구하는 방법 1
+# # for row in range(tc):
+# #     for col in range(tc):
+# #         total += arr[row][col]
+#
+# #행렬 전체합 구하는 방법 2 -> 1과 수행 시간 차이 없음
+# for i, j in zip(arr, zip(*arr)):
+#     total += sum(i) + sum(j)
+# total //= 2
+#
+# first_team = list(cb(member,(tc//2)))
+# reverse_arr = list(zip(*arr))
+#
+# #최소 차이 구하기2
+# mins = 10000000
+# for ft in first_team:
+#     first_team_score = 0
+#     for ppl in ft:
+#         first_team_score += sum(arr[ppl]) + sum(reverse_arr[ppl])
+#     mins = min(mins, abs(total - first_team_score))
+# print(mins)
 
-total = 0
-#행렬 전체합 구하는 방법 1
-# for row in range(tc):
-#     for col in range(tc):
-#         total += arr[row][col]
+#최소 차이 구하기1
+# diff = []
+# for ft in first_team:
+#     first_team_score = 0
+#     for ppl in ft:
+#         first_team_score += sum(arr[ppl]) + sum(reverse_arr[ppl])
+#     diff.append(abs(total - first_team_score))
+# print(min(diff))
 
-#행렬 전체합 구하는 방법 2 -> 1과 수행 시간 차이 없음
-for i, j in zip(arr, zip(*arr)):
-    total += sum(i) + sum(j)
-total //= 2
-
-first_team = list(cb(member,(tc//2)))
-reverse_arr = list(zip(*arr))
-
-diff = []
-for ft in first_team:
-    first_team_score = 0
-    for ppl in ft:
-        first_team_score += sum(arr[ppl]) + sum(reverse_arr[ppl])
-    diff.append(abs(total - first_team_score))
-print(min(diff))
 
 # 첫 번째 시도
 # #itertools.combinations 사용해서 부분집합 만들기
