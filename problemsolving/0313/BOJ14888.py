@@ -75,40 +75,36 @@
 # print(max(ans_cnd))
 # print(min(ans_cnd))
 
-#모범답안
-'''
-import sys
-input = sys.stdin.readline
+#모범답안 참고해서 다시 풀어보기
 
-N = int( input() )
-nums = list( map( int, input().split() ) )
-oper = list( map( int, input().split() ) )
+n = int(input())
+arr = list(map(int, input().split()))
+cal = list(map(int, input().split()))
+maxV = -(10**9)
+minV = 10 ** 9
 
-# method 2
-def backtrack( prevVal, size, idx, plus, minus, multi, divide ):
-	global max_num, min_num
-	if size == N - 1:
-		if max_num < prevVal:
-			max_num = prevVal
-		if min_num > prevVal:
-			min_num = prevVal
-	else:
-		if plus:
-			backtrack( prevVal + nums[idx], size + 1, idx + 1, plus - 1, minus, multi, divide )
+def dfs(prevV, idx, plus, minus, multi, divide):
+    global minV, maxV
+    if idx == n:
+        if minV > prevV:
+            minV = prevV
+        if maxV < prevV:
+            maxV = prevV
 
-		if minus:
-			backtrack( prevVal - nums[idx], size + 1, idx + 1, plus, minus - 1, multi, divide )
+    else:
+        if plus:
+            dfs(prevV + arr[idx], idx + 1, plus - 1, minus, multi, divide)
+        if minus:
+            dfs(prevV - arr[idx], idx + 1, plus, minus - 1, multi, divide)
+        if multi:
+            dfs(prevV * arr[idx], idx + 1, plus, minus, multi - 1, divide)
+        if divide:
+            if prevV < 0:
+                dfs(-(abs(prevV) // arr[idx]), idx + 1, plus, minus, multi, divide - 1)
+            else:
+                dfs(prevV // arr[idx], idx + 1, plus, minus, multi, divide - 1)
 
-		if multi:
-			backtrack( prevVal * nums[idx], size + 1, idx + 1, plus, minus, multi - 1, divide )
 
-		if divide:
-			if prevVal < 0:
-				backtrack( -(abs(prevVal) // nums[idx]), size + 1, idx + 1, plus, minus, multi, divide - 1 )
-			else:
-				backtrack( prevVal // nums[idx], size + 1, idx + 1, plus, minus, multi, divide - 1 )
-max_num = -(10**9+1)
-min_num = 10 ** 9 + 1
-backtrack( nums[0], 0, 1, *oper )
-print( max_num, min_num, sep = '\n' )
-'''
+dfs(arr[0], 1, *cal)
+print(maxV)
+print(minV)
