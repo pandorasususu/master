@@ -1,6 +1,24 @@
 #SWEA5102
 from pprint import pprint
+
 tc = int(input())
+
+def bfs(q, distance):
+    front = q.pop(0)
+    print(front, end=' ')
+    for idx in range(V+1):
+        if adj[front][idx] and not visited[idx]:
+            if idx == G:
+                distance += 1
+                cnd.append(distance)
+                return
+            else:
+                visited[idx] = 1
+                q.append(idx)
+                distance += 1
+                bfs(q, distance)
+
+
 
 for _ in range(1, tc+1):
     V, E = map(int, input().split())
@@ -11,26 +29,13 @@ for _ in range(1, tc+1):
     for node in arr:
         [row, col] = node
         adj[row][col] = adj[col][row] = 1
-
+    q = [S]
     visited = [0] * (V+1)
-    Q = []
-    Q.append((1,0))
+    visited[S] = 1
     distance = 0
-    while Q:
-        front, d = Q.pop(0)
-        for i in range(1, V+1):
-            if adj[front][i] and not visited[i]:
-                if i == G:
-                    result = distance
-
-                distance += 1
-                Q.append((i, d+1))
-                visited[i] = 1
-        else:
-            Q.append((1,0))
-
-    print(f'#{_} {result}')
-
+    cnd = []
+    bfs(q,distance)
+    print(f'#{_} {min(cnd)}')
 '''
 
 3
