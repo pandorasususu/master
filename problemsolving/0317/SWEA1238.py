@@ -2,69 +2,37 @@
 import sys
 sys.stdin = open('SWEA1238.txt')
 
-# tc = 10
-#
-# for _ in range(1, tc+1):
-#     n, start = map(int, input().split())
-#     arr = list(map(int, input().split()))
-#
-#     adj = [[0] * 101 for _ in range(101)]
-#     # tree = [[i] for i in range(m+1)]
-#     # print(tree)
-#     for idx in range(0, len(arr), 2):
-#         row, col = arr[idx], arr[idx+1]
-#         if not adj[row][col]:
-#             adj[row][col] = 1
-#         else:
-#             adj[col][row] = 1
-#
-#     stack = []
-#     stack.append(start)
-#     visited = [0] * 101
-#     visited[start] = 1
-#     cnd = []
-#     while True:
-#         person = stack[-1]
-#         for v in range(101):
-#             if adj[person][v] and not visited[v]:
-#                 stack.append(v)
-#                 visited[v] = 1
-#                 if adj[v] == [0] * 101:
-#                     cnd.append([len(stack), v])
-#                 break
-#         else:
-#             a = stack.pop()
-#             if a == start:
-#                 break
-#     cnd.sort(reverse=True)
-#     cnd = sorted(cnd, reverse=True)
-#
-#     print(cnd)
-#     print(f'#{_} {cnd[0][1]}')
+def BFS(q):
+    global ans
+    max_len = 1
+    last_node = []
+    while q:
+        node = q.pop(0)
+        for v in range(101):
+            if adj[node][v] and not visited[v]:
+                q.append(v)
+                visited[v] = visited[node] + 1
+                if max_len < visited[v]:
+                    max_len = visited[v]
+    for idx in range(101):
+        if visited[idx] == max_len:
+            last_node.append(idx)
+    ans = max(last_node)
+tc = 10
 
-
-
-    # print(f'#{_} {maxV2}')
-
-    # for i in range(1, 101):
-    #     print(f'{i}: ', end='')
-    #     for j in range(101):
-    #         if adj[i][j] == 1:
-    #             print(j, end=' ')
-    #     print()
-
-'''
-#1 17 
-#2 96
-#3 49 
-#4 39 
-#5 49 
-#6 1 
-#7 28 
-#8 45 
-#9 59
-#10 64 
-'''
+for _ in range(1, tc+1):
+    N, START = map(int, input().split())
+    arr = list(map(int, input().split()))
+    adj = [[0] * 101 for _ in range(101)]
+    for t in range(0, N, 2):
+        r, c = arr[t], arr[t+1]
+        adj[r][c] = 1
+    q = [START]
+    visited = [0] * 101
+    visited[START] = 1
+    ans = 0
+    BFS(q)
+    print(f'#{_} {ans}')
 
 #live answer
 
