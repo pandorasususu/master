@@ -31,10 +31,18 @@
 #
 #     print(f'#{_} {ans}')
 
-from pprint import pprint
 
-import sys
-sys.stdin = open('micro.txt')
+#2022.04.03 다시 풀어보기
+'''
+a = [0,1,2,3]
+a0, a1 = a[0], a[1]
+a0+=1
+a1+=1
+print(a, a0, a1) #이 때 리스트a는 변하지 않는다.
+a[0] += 1
+a[1] += 1
+print(a, a[0], a[1]) #이렇게 접근해야 변한다.
+'''
 
 tc = int(input())
 dr, dc = [0,-1,1,0,0],[0,0,0,-1,1]
@@ -46,10 +54,8 @@ for _ in range(1, tc+1):
 
     for _2 in range(time):
         for idx_g in range(len(micro)):
-            r, c, num, move = micro[idx_g][0], micro[idx_g][1], micro[idx_g][2], micro[idx_g][3]
-            print(micro[idx_g])
-            micro[idx_g][0] += dr[move]
-            micro[idx_g][1] += dc[move]
+            micro[idx_g][0] += dr[micro[idx_g][3]]
+            micro[idx_g][1] += dc[micro[idx_g][3]]
             if micro[idx_g][0] == 0 or micro[idx_g][0] == size-1 or micro[idx_g][1] == 0 or micro[idx_g][1] == size-1:
                 micro[idx_g][2] //= 2
                 micro[idx_g][3] = opp[micro[idx_g][3]]
@@ -68,3 +74,4 @@ for _ in range(1, tc+1):
         cnt += micro[idx_m][2]
 
     print(f'#{_} {cnt}')
+
