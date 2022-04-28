@@ -57,15 +57,15 @@ def solve_tbl():  # 테이블에 저장해놓고 활용하는 가장 좋은 풀�
     for i in range(N):
         for j in range(N):
             if arr[i][j]:
-                home.append((i, j))
+                home.append((i, j)) #집의 위치를 home 리스트에 저장
 
     for si in range(N):
-        for sj in range(N):
+        for sj in range(N): #마을을 전부 순회하면서
             cnts = [0] * 40
-            for ci, cj in home:
-                dist = abs(si - ci) + abs(sj - cj) + 1
+            for ci, cj in home: #해당 좌표에서 집들까지의 거리를 cnts리스트에 저장
+                dist = abs(si - ci) + abs(sj - cj) + 1 #왜 거리를 이렇게 표시하는지는, 서비스 영역이 늘어나는 모습을 보면 알 수 있음. 1을 더한 이유는, cnts와 cost가 1부터 시작하기 때문
                 cnts[dist] += 1
-            for i in range(1, 40):
+            for i in range(1, 40): #최대한의 집을 포함하는 범위를 구하기 위한 작업
                 cnts[i] += cnts[i - 1]
 
             for k in range(1, 40):
