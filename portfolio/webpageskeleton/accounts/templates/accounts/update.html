@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>회원정보 수정 페이지</h1>
+<form action="{% url 'accounts:user_update' target.username %}" method='POST'>
+  {% csrf_token %}
+  {{user_update_form.as_p}}
+  <input type="submit" value="정보수정">
+</form>
+{% endblock content %}
+
+
+{% block script %}
+{% endblock script %}

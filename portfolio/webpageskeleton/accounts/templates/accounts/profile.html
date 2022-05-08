@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h1>{{target.username}}의 프로필</h1>
+  {% if user == target %}
+  <a href={% url 'accounts:user_update' user.username%}>회원 정보 수정</a>
+  {% endif %}
+
+  <p>팔로잉: {{target.followings.all | length}} 팔로워: {{target.followers.all | length}}</p>
+  {% if target != user %}
+  <form action="{% url 'accounts:follow' target.username %}"method='POST'>
+    {% csrf_token %}
+    {% if user in target.followers.all %}
+    <input type="submit" value="언팔로우">
+    {% else %}
+    <input type="submit" value="팔로우">
+    {% endif %}
+  </form>
+  {% endif %}
+
+  <h3>{{target.username}}가 쓴 게시글</h3>
+  <ul id="profileArticleList">
+    {% for article in target.articles.all %}
+      <li>{{article.title}}</li>
+    {% endfor %}
+  </ul>
+
+  <h3>{{target.username}}가 쓴 댓글</h3>
+  <ul id="profileCommentList">
+    {% for comment in target.comments.all %}
+      <li>{{comment.content}}</li>
+    {% endfor %}
+  </ul>
+{% endblock content %}
+
+
+{% block script %}
+{% endblock script %}

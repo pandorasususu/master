@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <p>제목: {{article.title}}</p>
+  <hr>
+  {{article.content}}
+
+  <ul>
+  {% for comment in comments %}
+  <li>
+    <p>{{comment.user}}</p>
+    {{comment.content}} 작성일: {{comment.created_at}}
+    {% if user == comment.user %}
+      <form action={% url 'community:comment_delete' article.pk comment.pk%} method='POST'>
+        {% csrf_token %}
+        <input type="submit" value="삭제하기">
+      </form>
+    {% endif %}
+  </li>
+  {% endfor %}
+  </ul>
+  <p>댓글 작성하기 </p>
+  <form action={% url 'community:comment_create' article.pk%} method='POST'>
+    {% csrf_token %}
+    {{comment_form.as_p}}
+    <input type="submit" value="등록">
+  </form>
+{% endblock content %}
+
+
+{% block script %}
+{% endblock script %}

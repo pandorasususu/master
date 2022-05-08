@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h1>게시글 작성</h1>
+  <form action={% url 'community:article_create' %} method='POST'>
+    {% csrf_token %}
+    {{article_create_form.as_p}}
+    <input type="submit" value="등록">
+  </form>
+
+  <a href={% url 'community:home' %}>홈</a>
+{% endblock content %}
+
+
+{% block script %}
+{% endblock script %}
