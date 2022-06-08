@@ -24,3 +24,12 @@ etc...
 
 server/community, movies, users의 models.py작성
 
+
+
+# 2022.06.08
+
+server/community, movies, users의 urls.py/views.py작성
+
+client store/modules/account 작성
+
+login/logout/signup 구현 중

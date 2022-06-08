@@ -1,24 +1,20 @@
 <template>
-  <div id="app">
-    <nav-bar>
-      <router-link to="/">Home</router-link> |
-      <router-link to="/about">About</router-link>
-    </nav-bar>
+  <div id="app" class="flex flex-row">
+    <nav-bar-comp></nav-bar-comp>
     <router-view/>
   </div>
 </template>
 
 <script>
-import NavBar from '@/components/basic/NavBar.vue'
+  import NavBarComp from '@/components/basic/NavBarComp.vue'
 
-export default {
-  name:'app',
-  component: {
-    NavBar
+  export default {
+    name:'app',
+    components: { NavBarComp },
+    
   }
-  
-}
+</script>
 
-<style>
+<style scoped>
 
 </style>

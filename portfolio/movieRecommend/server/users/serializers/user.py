@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from community.models import Article, Comment
-
+from ..models import Rating
 User = get_user_model()
 
 class UserProfileSerilizer(serializers.ModelSerializer):

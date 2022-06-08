@@ -1,11 +1,12 @@
 <template>
-  
+  <div id="SignUpView">
+
+  </div>
 </template>
 
 <script>
 export default {
-  name:'navbar',
-  
+  name:'SignUpView'
 }
 </script>
 

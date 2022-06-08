@@ -1,37 +1,172 @@
 from django.shortcuts import get_object_or_404
 from django.contrib.auth import get_user_model
+from django.db.models import Count, Avg
 
-from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 
 # model, serializers
-from .serializers import UserProfileSerilizer
+from .serializers.user import UserProfileSerilizer
+from .serializers.rating import RatingSerializer, RatingListSerializer
+from .models import Rating
 
 # Create your views here.
 
 User = get_user_model()
 
 # 유저 프로필
-@api_view(['GET'])
-def user_profile(request, username):
+@api_view(['GET', 'POST'])
+def user_profile_or_follow(request, username):
     viewed_user = get_object_or_404(User, username=username)
-    serializer = UserProfileSerilizer(viewed_user)
-    return Response(serializer.data)
+    current_user = request.user
 
+    def user_profile():
+        if viewed_user.followers.filter(pk=current_user.pk).exists():
+            now_following = True
+        else:
+            now_following = False
+        serializer = UserProfileSerilizer(viewed_user)
+        context = {
+            'now_following': now_following,
+            'followings_count': User.objects.get(user_id=viewed_user.id).Count('followings'),
+            'followers_count': User.objects.get(user_id=viewed_user.id).Count('followers')
+        }
+        return Response(serializer.data, context)
+    
+    def user_follow():
+    
+        if viewed_user != current_user:
+            if viewed_user.followers.filter(pk=current_user.pk).exists():
+                viewed_user.followers.remove(current_user)
+                now_following = False
+            else:
+                viewed_user.followers.add(current_user)
+                now_following = True
+            serializer = UserProfileSerilizer(viewed_user)
+        context = {
+            'now_following': now_following,
+            'followings_count': User.objects.get(user_id=viewed_user.id).Count('followings'),
+            'followers_count': User.objects.get(user_id=viewed_user.id).Count('followers')
+        }
+        return Response(serializer.data, context)   
+
+    if request.method == 'GET':
+        return user_profile()
+    elif request.method == 'POST':
+        return user_follow()
+
+        
 # 유저 팔로우/팔로우 취소 기능
 # 과제로 제출한 프로젝트에서는 팔로우 할 때 마다 UserProfileSerilizer를 통해 모든 정보를 다시 보내줬음
 # 팔로우 여부에 대한 정보만 전달하는 것이 적절하다고 판단해서 수정
-@api_view(['POST'])
-def user_follow(request, username):
-    target = get_object_or_404(User, username=username)
-    current_user = request.user
+# @api_view(['POST'])
+# def user_follow(request, username):
+#     target = get_object_or_404(User, username=username)
+#     current_user = request.user
     
-    if target != current_user:
-        if target.followers.filter(pk=current_user.pk).exists():
-            target.followers.remove(current_user)
-            now_following = False
+#     if target != current_user:
+#         if target.followers.filter(pk=current_user.pk).exists():
+#             target.followers.remove(current_user)
+#             now_following = False
+#         else:
+#             target.followers.add(current_user)
+#             now_following = True
+#         serializer = UserProfileSerilizer(target)
+#     context = {
+#         'now_following': now_following,
+#         'followings_count': User.objects.get(user_id=target.id).Count('followings'),
+#         'followers_count': User.objects.get(user_id=target.id).Count('followers')
+#     }
+#     return Response(serializer.data, context)
+
+
+@api_view(['GET','POST'])
+def read_or_create_rating(request, movie_id):
+    user = request.user
+
+    def read_ratings():
+        rating_list = Rating.objects.annotate(
+            like_count=Count('like_users', distinct=True),
+            dislike_count=Count('dislike_users', distinct=True),
+            avg_star_rating=Avg('star_rating', distinct=True)
+        ).get(movie_id=movie_id)
+        serializer_list = RatingListSerializer(rating_list, many=True)
+        if Rating.objects.filter(user=user, movie_id=movie_id).exists():
+            user_rating = get_object_or_404(Rating, user=user, movie_id=movie_id)
+            serializer_single = RatingSerializer(user_rating)
+            rating_exists = True
+            return Response(serializer_list.data, serializer_single.data, rating_exists)
         else:
-            target.followers.add(current_user)
-            now_following = True
-    return Response(now_following)
+            rating_exists = False
+            return Response(serializer_list.data, rating_exists)
+
+    def create_rating():
+        serializer = RatingSerializer(data=request.data)
+        if serializer.is_valid(raise_exception=True):
+            serializer.save(user=user, movie_id=movie_id)
+            return Response(serializer.data)
+    
+    if request.method == 'GET':
+        return read_ratings()
+    elif request.method == 'POST':
+        return create_rating()
+
+@api_view(['PUT', 'DELETE'])
+def update_or_delete_rating(request, movie_id, rating_pk):
+    user = request.user
+    rating = get_object_or_404(Rating, pk=rating_pk)
+
+    def update_rating():
+        serializer_single = RatingSerializer(rating, data=request.data)
+        if serializer_single.is_valid(raise_exception=True):
+            serializer_single.save()
+
+            rating_list = Rating.objects.annotate(
+                like_count=Count('like_users', distinct=True),
+                dislike_count=Count('dislike_users', distinct=True),
+                avg_star_rating=Avg('star_rating', distinct=True)
+            ).get(movie_id=movie_id)
+            serializer_list = RatingListSerializer(rating_list, many=True)
+
+            rating = get_object_or_404(Rating, pk=rating_pk)
+            serializer_single = RatingSerializer(rating)
+
+            return Response(serializer_single.data, serializer_list.data)
+
+    def delete_rating():
+        rating.delete()
+        rating_list = Rating.objects.annotate(
+            like_count=Count('like_users', distinct=True),
+            dislike_count=Count('dislike_users', distinct=True),
+            avg_star_rating=Avg('star_rating', distinct=True)
+        ).get(movie_id=movie_id)
+        serializer_list = RatingListSerializer(rating_list, many=True)
+        return Response(serializer_list.data)
+
+    if request.method == 'PUT':
+        return update_rating()
+    elif request.method == 'DELETE':
+        return delete_rating()
+        
+@api_view(['POST'])
+def like_rating(request, movie_id, rating_pk):
+    rating = get_object_or_404(Rating, pk=rating_pk)
+    user = request.user
+
+    if rating.like_users.filter(user=user).exists():
+        rating.like_users.remove(user)
+    else:
+        rating.like_users.add(user)
+    
+    rating_list = Rating.objects.annotate(
+        like_count=Count('like_users', distinct=True),
+        dislike_count=Count('dislike_users', distinct=True),
+        avg_star_rating=Avg('star_rating', distinct=True)
+    ).get(movie_id=movie_id)
+    serializer_list = RatingListSerializer(rating_list, many=True)
+
+    rating = get_object_or_404(Rating, pk=rating_pk)
+    serializer_single = RatingSerializer(rating)
+
+    return Response(serializer_single.data, serializer_list.data)
+
