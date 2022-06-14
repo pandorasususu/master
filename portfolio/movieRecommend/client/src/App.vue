@@ -6,13 +6,18 @@
 </template>
 
 <script>
-  import NavBarComp from '@/components/basic/NavBarComp.vue'
-
-  export default {
-    name:'app',
-    components: { NavBarComp },
-    
+import NavBarComp from '@/components/basic/NavBarComp.vue'
+import {mapActions} from 'vuex'
+export default {
+  name:'app',
+  components: { NavBarComp },
+  methods: {
+    ...mapActions(['getCurrentUser'])
+  },
+  created(){
+    this.getCurrentUser()
   }
+}
 </script>
 
 <style scoped>

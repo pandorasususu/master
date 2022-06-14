@@ -1,4 +1,4 @@
-from django.shortcuts import get_object_or_404, get_list_or_404
+from django.shortcuts import get_object_or_404
 from django.db.models import Count
 
 from rest_framework.response import Response
@@ -39,22 +39,19 @@ def read_or_create_articles(request):
         return create_article()
 
 @api_view(['GET','PUT', 'DELETE'])
-def detail_update_or_delete_article(request, article_pk):
+def detail_or_update_or_delete_article(request, article_pk):
     article = get_object_or_404(Article, pk=article_pk)
-    if article.like_users.filter(pk=request.user.pk).exists():
-        now_like = True
-    else:
-        now_like = False
 
     def detail_article():
         serializer = ArticleSerializer(article)
-        return Response(serializer.data, now_like)
+        return Response(serializer.data)
     def update_article():
         if request.user == article.user:
             serializer = ArticleSerializer(article, data=request.data)
             if serializer.is_valid(raise_exception=True):
                 serializer.save()
-                return Response(serializer.data, now_like)
+                return Response(serializer.data)
+
     def delete_article():
         if request.user == article.user:
             article.delete()
@@ -77,13 +74,11 @@ def like_article(request, article_pk):
 
     if article.like_users.filter(pk=user.pk).exists():
         article.like_users.remove(user)
-        now_like = False
     else:
         article.like_users.add(user)
-        now_like = True
 
     serializer = ArticleSerializer(article)
-    return Response(serializer.data, now_like)
+    return Response(serializer.data)
 
 @api_view(['POST'])
 def create_comment(request, article_pk):
@@ -110,28 +105,19 @@ def update_or_delete_comment(request, article_pk, comment_pk):
     article = get_object_or_404(Article, pk=article_pk)
     comment = get_object_or_404(Comment, pk=comment_pk)
 
-    # comment의 like_users 중 로그인한 유저가 있다면 now_like=True, 아니면 False
-    if comment.like_users.filter(pk=user.pk).exists():
-        now_like = True
-    else:
-        now_like = False
-
     def update_comment():
         serializer = CommentSerializer(comment, data=request.data)
         if serializer.is_valid(raise_exception=True):
             serializer.save()
             comments = article.comments.all()
             serializer = CommentSerializer(comments, many=True)
-            return Response(serializer.data, now_like)
+            return Response(serializer.data)
 
     def delete_comment():
         comment.delete()
         comments= article.comments.all()
         serializer = CommentSerializer(comments, many=True)
-        context = {
-            'delete_msg': '성공적으로 댓글을 삭제했습니다.'
-        }
-        return Response(serializer.data, context)
+        return Response(serializer.data)
 
     if request.method == 'PUT':
         return update_comment()
@@ -145,12 +131,10 @@ def like_comment(request, article_pk, comment_pk):
     comment = get_object_or_404(Comment, pk=comment_pk)
     if comment.like_users.filter(pk=user.pk).exists():
         comment.like_users.remove(user)
-        now_like = False
     else:
         comment.like_users.add(user)
-        now_like = True
     
     comments = article.comments.all()
     serializer = CommentSerializer(comments, many=True)
-    return Response(serializer.data, now_like)
+    return Response(serializer.data)
 

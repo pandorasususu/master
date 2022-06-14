@@ -21,17 +21,30 @@ def user_profile_or_follow(request, username):
     current_user = request.user
 
     def user_profile():
-        if viewed_user.followers.filter(pk=current_user.pk).exists():
-            now_following = True
+        if viewed_user != current_user:
+            if viewed_user.followers.filter(pk=current_user.pk).exists():
+                now_following = True
+            else:
+                now_following = False
+            serializer = UserProfileSerilizer(viewed_user)
+            context = {
+                'data': serializer.data,
+                'now_following': now_following,
+                # followings/followers 는 array 형태의 데이터, 이의 length를 통해 아래의 결과를 똑같이 얻을 수 있음
+                # 'followings_count': User.objects.filter(id=viewed_user.id).aggregate(Count('followings'))['followings__count'],
+                # 'followers_count': User.objects.filter(id=viewed_user.id).aggregate(Count('followers'))['followers__count']
+            }
+            return Response(context)
+        
         else:
-            now_following = False
-        serializer = UserProfileSerilizer(viewed_user)
-        context = {
-            'now_following': now_following,
-            'followings_count': User.objects.get(user_id=viewed_user.id).Count('followings'),
-            'followers_count': User.objects.get(user_id=viewed_user.id).Count('followers')
-        }
-        return Response(serializer.data, context)
+            serializer = UserProfileSerilizer(viewed_user)
+            context = {
+                'data': serializer.data,
+                # 'followings_count': User.objects.filter(id=viewed_user.id).aggregate(Count('followings'))['followings__count'],
+                # 'followers_count': User.objects.filter(id=viewed_user.id).aggregate(Count('followers'))['followers__count']
+            }
+            return Response(context)
+
     
     def user_follow():
     
@@ -44,11 +57,12 @@ def user_profile_or_follow(request, username):
                 now_following = True
             serializer = UserProfileSerilizer(viewed_user)
         context = {
+            'data': serializer.data,
             'now_following': now_following,
-            'followings_count': User.objects.get(user_id=viewed_user.id).Count('followings'),
-            'followers_count': User.objects.get(user_id=viewed_user.id).Count('followers')
+            # 'followings_count': User.objects.filter(id=viewed_user.id).aggregate(Count('followings'))['followings__count'],
+            # 'followers_count': User.objects.filter(id=viewed_user.id).aggregate(Count('followers'))['followers__count']
         }
-        return Response(serializer.data, context)   
+        return Response(context)   
 
     if request.method == 'GET':
         return user_profile()
@@ -74,8 +88,8 @@ def user_profile_or_follow(request, username):
 #         serializer = UserProfileSerilizer(target)
 #     context = {
 #         'now_following': now_following,
-#         'followings_count': User.objects.get(user_id=target.id).Count('followings'),
-#         'followers_count': User.objects.get(user_id=target.id).Count('followers')
+#         'followings_count': User.objects.get(id=target.id).Count('followings'),
+#         'followers_count': User.objects.get(id=target.id).Count('followers')
 #     }
 #     return Response(serializer.data, context)
 
@@ -95,10 +109,20 @@ def read_or_create_rating(request, movie_id):
             user_rating = get_object_or_404(Rating, user=user, movie_id=movie_id)
             serializer_single = RatingSerializer(user_rating)
             rating_exists = True
-            return Response(serializer_list.data, serializer_single.data, rating_exists)
+
+            context = {
+                'rating_list_data': serializer_list.data,
+                'rating_mine_data': serializer_single.data,
+                'rating_exists': rating_exists,
+            }
+            return Response(context)
         else:
             rating_exists = False
-            return Response(serializer_list.data, rating_exists)
+            context = {
+                'rating_list_data': serializer_list.data,
+                'rating_exists': rating_exists,
+            }
+            return Response(context)
 
     def create_rating():
         serializer = RatingSerializer(data=request.data)
@@ -131,7 +155,11 @@ def update_or_delete_rating(request, movie_id, rating_pk):
             rating = get_object_or_404(Rating, pk=rating_pk)
             serializer_single = RatingSerializer(rating)
 
-            return Response(serializer_single.data, serializer_list.data)
+            context = {
+                'rating_list_data': serializer_list.data,
+                'rating_mine_data': serializer_single.data,
+            }
+            return Response(context)
 
     def delete_rating():
         rating.delete()
@@ -167,6 +195,9 @@ def like_rating(request, movie_id, rating_pk):
 
     rating = get_object_or_404(Rating, pk=rating_pk)
     serializer_single = RatingSerializer(rating)
-
-    return Response(serializer_single.data, serializer_list.data)
+    context = { 
+        'rating_list_data': serializer_list.data,
+        'rating_mine_data': serializer_single.data,
+    }
+    return Response(context)
 
